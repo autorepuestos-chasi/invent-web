@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import re
+import requests
+from io import StringIO
+
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -75,8 +78,16 @@ URL_CSV = URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v
 
 @st.cache_data(ttl=600)
 def cargar_datos():
-    df = pd.read_csv(URL_CSV)
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
+    response = requests.get(URL_CSV, headers=headers, timeout=30)
+
+    if response.status_code != 200:
+        raise RuntimeError("❌ No se pudo cargar la base de datos desde Google Drive")
+
+    df = pd.read_csv(StringIO(response.text))
     df = df.fillna("-")
 
     df["_search"] = (
