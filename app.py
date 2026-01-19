@@ -110,7 +110,7 @@ def cargar_datos(refresh):
     )
 
     return df
-df = cargar_datos()
+df = cargar_datos(st.session_state.refresh)
 # =========================
 # LINKS CLICKEABLES
 # =========================
