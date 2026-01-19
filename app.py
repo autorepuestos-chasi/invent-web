@@ -70,8 +70,8 @@ URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=50767352
 URL_CSV = f"{URL_BASE}&v={int(time.time() // 300)}"
 CACHE_LOCAL = "cache_datos.csv"
 
-@st.cache_data(ttl=60)
-def cargar_datos():
+@st.cache_data(ttl=60, show_spinner=False)
+def cargar_datos(cache_buster: int):
     try:
         df = pd.read_csv(URL_CSV)
         df.to_csv(CACHE_LOCAL, index=False)
@@ -89,7 +89,8 @@ def cargar_datos():
 
     return df
 
-df = cargar_datos()
+df = cargar_datos(int(time.time() // 300))
+
 
 # =========================
 # LINKS CLICKEABLES
