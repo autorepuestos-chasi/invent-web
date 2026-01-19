@@ -71,7 +71,7 @@ if st.button("🔄 Actualizar datos"):
 # =========================
 # CARGA DE DATOS (ENDPOINT ESTABLE)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/TU_SPREADSHEET_ID/export?format=csv&gid=507673529"
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=45200806&single=true&output=csv"
 
 @st.cache_data(ttl=600)
 def cargar_datos():
