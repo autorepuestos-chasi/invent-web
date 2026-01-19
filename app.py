@@ -69,8 +69,8 @@ busqueda = st.text_input(
 if busqueda:
     texto = busqueda.lower().strip()
 
-    # Columnas fijas (SIN columna 0)
-    columnas_fijas = [6, 8, 7, 2, 11]
+    # Columnas fijas 
+    columnas_fijas = [0, 6, 8, 7, 2, 11]
 
     filtrado = df[
         df.astype(str)
