@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import re
-import requests
-from io import StringIO
-
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -15,7 +12,7 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILOS (SCROLL RESPONSIVE)
+# ESTILOS
 # =========================
 st.markdown("""
 <style>
@@ -26,13 +23,11 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* Contenedor con scroll horizontal */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-/* Tabla */
 table {
     width: 100%;
     min-width: 720px;
@@ -50,7 +45,6 @@ th {
     background-color: #f0f0f0;
 }
 
-/* Links */
 a {
     color: #1f77b4;
     text-decoration: underline;
@@ -65,52 +59,45 @@ st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsa
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 # =========================
-# BOTÓN MANUAL DE ACTUALIZACIÓN
+# URL GOOGLE SHEETS (CSV)
+# =========================
+URL_CSV = (
+    "https://docs.google.com/spreadsheets/d/"
+    "12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN"
+    "/export?format=csv&gid=1001946414"
+)
+
+# =========================
+# BOTÓN ACTUALIZAR
 # =========================
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
 
 # =========================
-# CARGA DE DATOS (ENDPOINT ESTABLE)
+# CARGA DE DATOS
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN/export?format=csv&gid=1001946414"
-
-if "refresh" not in st.session_state:
-    st.session_state.refresh = 0
-
-if st.button("🔄 Actualizar datos"):
-    st.session_state.refresh += 1
-
-@st.cache_data
-def cargar_datos(refresh):
-    df = pd.read_csv(URL_CSV)
+@st.cache_data(ttl=600)
+def cargar_datos():
+    try:
+        df = pd.read_csv(URL_CSV)
+    except Exception as e:
+        st.error("❌ No se pudo cargar la base de datos desde Google Sheets")
+        st.stop()
 
     df.columns = df.columns.str.strip()
+    df = df.fillna("-")
 
     df["_search"] = (
         df.astype(str)
-        .fillna("")
         .agg(" ".join, axis=1)
         .str.lower()
     )
 
     return df
-    df = pd.read_csv(URL_CSV)
 
-    # Limpia nombres de columnas
-    df.columns = df.columns.str.strip()
+df = cargar_datos()
 
-    # Crear columna de búsqueda segura
-    df["_search"] = (
-        df.astype(str)
-        .fillna("")
-        .agg(" ".join, axis=1)
-        .str.lower()
-    )
-
-    return df
-df = cargar_datos(st.session_state.refresh)
 # =========================
 # LINKS CLICKEABLES
 # =========================
@@ -125,7 +112,7 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA (FACEBOOK)
+# NORMALIZAR BÚSQUEDA
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
@@ -149,10 +136,11 @@ if busqueda:
     texto = normalizar_busqueda(busqueda)
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
+    columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas].head(10).fillna("-")
+    resultados = filtrado[columnas].head(10)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
