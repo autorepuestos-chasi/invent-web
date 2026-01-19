@@ -1,6 +1,16 @@
 import streamlit as st
 import pandas as pd
 
+def hacer_links(df):
+    df = df.copy()
+    for col in df.columns:
+        df[col] = df[col].apply(
+            lambda x: f'<a href="{x}" target="_blank">{x}</a>'
+            if isinstance(x, str) and x.startswith("http")
+            else x
+        )
+    return df
+
 # =========================
 # CONFIGURACIÓN GENERAL
 # =========================
@@ -106,13 +116,4 @@ if busqueda:
 
     else:
         st.warning("No se encontraron resultados")
-def hacer_links(df):
-    df = df.copy()
-    for col in df.columns:
-        df[col] = df[col].apply(
-            lambda x: f'<a href="{x}" target="_blank">{x}</a>'
-            if isinstance(x, str) and x.startswith("http")
-            else x
-        )
-    return df
 
