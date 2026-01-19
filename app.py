@@ -79,10 +79,10 @@ if busqueda:
     ]
 
     resultados = filtrado.iloc[:, columnas_fijas].head(10)
+	resultados = resultados.reset_index(drop=True)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-	resultados = resultados.reset_index(drop=True)
         st.table(resultados)
     else:
         st.warning("No se encontraron resultados")
