@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import time
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -11,56 +12,22 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILOS OPTIMIZADOS CELULAR
+# ESTILOS RESPONSIVE
 # =========================
 st.markdown("""
 <style>
-.block-container {
-    padding-top: 2.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    max-width: 100%;
-}
-
-/* Tabla limpia y centrada */
-table {
-    width: 100% !important;
-    font-size: 13px;
-    border-collapse: collapse;
-}
-
-/* Celdas */
-th, td {
-    padding: 6px;
-    text-align: left;
-    word-break: break-word;
-}
-
-/* Encabezados */
-th {
-    background-color: #f0f0f0;
-}
-
-/* Links */
-a {
-    color: #1f77b4;
-    text-decoration: underline;
-}
+.main { max-width: 100%; }
+table { width: 100% !important; font-size: 14px; }
+th, td { padding: 6px 8px; }
+th { background-color: #f2f2f2; }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
 # TÍTULO
 # =========================
-st.markdown(
-    "<h2 style='text-align:center;'>🔍 Buscador de Repuestos</h2>",
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    "<p style='text-align:center;'>AutoRepuestos Chasi</p>",
-    unsafe_allow_html=True
-)
+st.markdown("<h2 style='text-align:center;'>🔍 Buscador de Repuestos</h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;'>AutoRepuestos Chasi</p>", unsafe_allow_html=True)
 
 # =========================
 # CARGA DE DATOS
@@ -69,66 +36,73 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4k
 
 @st.cache_data(ttl=300)
 def cargar_datos():
-    df = pd.read_csv(URL_CSV)
-
-    columnas_busqueda = df.columns.tolist()
-
-    df["_search"] = (
-        df[columnas_busqueda]
-        .astype(str)
-        .apply(lambda x: " ".join(x), axis=1)
-        .str.lower()
-    )
-
-    return df
+    return pd.read_csv(URL_CSV)
 
 df = cargar_datos()
 
 # =========================
-# FUNCIÓN PARA LINKS
+# SESSION STATE (DEBOUNCE)
 # =========================
-def hacer_links(df):
-    df = df.copy()
-    for col in df.columns:
-        df[col] = df[col].apply(
-            lambda x: f'<a href="{x}" target="_blank">{x}</a>'
-            if isinstance(x, str) and x.startswith("http")
-            else x
-        )
-    return df
+if "last_input" not in st.session_state:
+    st.session_state.last_input = ""
+if "last_time" not in st.session_state:
+    st.session_state.last_time = time.time()
 
 # =========================
 # BUSCADOR
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: bujía, filtro, Toyota..."
+    placeholder="Ej: bujia toyota | filtro chevrolet"
 )
 
 # =========================
-# RESULTADOS (TABLA HTML FIJA)
+# DEBOUNCE (400 ms)
 # =========================
+now = time.time()
+buscar = False
+
+if busqueda != st.session_state.last_input:
+    st.session_state.last_input = busqueda
+    st.session_state.last_time = now
+else:
+    if now - st.session_state.last_time > 0.4:
+        buscar = True
+
 # =========================
-# RESULTADOS (BUSCADOR RÁPIDO)
+# FUNCIÓN AND / OR
 # =========================
-if busqueda:
-    texto = busqueda.lower().strip()
+def filtrar_and_or(df, texto):
+    texto = texto.lower()
 
-    # Columnas fijas visibles (SIN columna 0)
-    columnas_fijas = [6, 8, 7, 2, 11]
+    bloques_or = [b.strip() for b in texto.split("|")]
 
-    filtrado = df[df["_search"].str.contains(texto, na=False)]
+    mask_final = pd.Series(False, index=df.index)
 
+    for bloque in bloques_or:
+        palabras_and = bloque.replace("+", " ").split()
+
+        mask_and = pd.Series(True, index=df.index)
+        for palabra in palabras_and:
+            mask_and &= df.astype(str).apply(
+                lambda col: col.str.lower().str.contains(palabra)
+            ).any(axis=1)
+
+        mask_final |= mask_and
+
+    return df[mask_final]
+
+# =========================
+# RESULTADOS
+# =========================
+if busqueda and buscar:
+
+    columnas_fijas = [6, 8, 7, 2, 11]  # SIN columna fantasma
+    filtrado = filtrar_and_or(df, busqueda)
     resultados = filtrado.iloc[:, columnas_fijas].head(10)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-
-        resultados = hacer_links(resultados)
-
-        st.markdown(
-            f"<div style='overflow-x:auto'>{resultados.to_html(index=False, escape=False)}</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown(resultados.to_html(index=False), unsafe_allow_html=True)
     else:
         st.warning("No se encontraron resultados")
