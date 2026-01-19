@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
+import time
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -57,6 +58,8 @@ a {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+if "ultima_actualizacion" in st.session_state:
+    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
 # =========================
 # LINK CSV PUBLICADO (CORRECTO)
@@ -66,9 +69,12 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4k
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
-if st.button("🔄 Actualizar datos"):
-    st.cache_data.clear()
-    st.rerun()
+col1, col2 = st.columns([3, 1])
+
+with col2:
+    if st.button("🔄 Actualizar datos"):
+        st.cache_data.clear()
+        st.rerun()
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
@@ -86,6 +92,10 @@ def cargar_datos():
         df.astype(str)
         .agg(" ".join, axis=1)
         .str.lower()
+    )
+
+    st.session_state["ultima_actualizacion"] = time.strftime(
+    "%d/%m/%Y %H:%M:%S"
     )
 
     return df
