@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-# =========================prueba
+# =========================ESTE ULTIMO BUENO
 # CONFIGURACIÓN GENERAL
 # =========================
 st.set_page_config(
@@ -98,32 +98,20 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA (URL FB)
-# =========================
-def normalizar_busqueda(texto):
-    texto = texto.strip().lower()
-
-    # Detectar link de Facebook Marketplace
-    match = re.search(r"item/(\d+)", texto)
-    if match:
-        return match.group(1)  # devuelve solo el ID
-
-    return texto
-
-# =========================
 # BUSCADOR
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: AA23"
+    placeholder="Ej: AA32"
 )
 
 # =========================
 # RESULTADOS (BUSCADOR RÁPIDO)
 # =========================
 if busqueda:
-    texto = normalizar_busqueda(busqueda)
+    texto = busqueda.lower().strip()
 
+    # Columnas fijas visibles
     columnas_fijas = [0, 6, 8, 7, 2, 11]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
