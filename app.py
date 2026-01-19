@@ -62,24 +62,20 @@ a {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+if st.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
 
 # =========================
 # CARGA DE DATOS (ANTI CACHE DRIVE)
 # =========================
-URL_BASE = "cdffe"
-URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
-CACHE_LOCAL = "cache_datos.csv"
+# URL_BASE = "cdffe"
+# URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
+# CACHE_LOCAL = "cache_datos.csv"
 
-@st.cache_data(ttl=60, show_spinner=False)
-def cargar_datos(cache_buster: int):
-    try:
-        df = pd.read_csv(URL_CSV)
-        df.to_csv(CACHE_LOCAL, index=False)
-    except Exception:
-        if os.path.exists(CACHE_LOCAL):
-            df = pd.read_csv(CACHE_LOCAL)
-        else:
-            raise RuntimeError("No se pudo cargar la base de datos")
+@st.cache_data(ttl=600)
+def cargar_datos():
+    df = pd.read_csv(URL_BASE)
 
     df["_search"] = (
         df.astype(str)
