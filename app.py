@@ -69,9 +69,9 @@ if st.button("🔄 Actualizar datos"):
 # =========================
 # CARGA DE DATOS (ANTI CACHE DRIVE)
 # =========================
-# URL_BASE = "cdffe"
-# URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
-# CACHE_LOCAL = "cache_datos.csv"
+URL_BASE = "cdffe"
+URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
+CACHE_LOCAL = "cache_datos.csv"
 
 @st.cache_data(ttl=600)
 def cargar_datos():
