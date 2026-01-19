@@ -132,6 +132,7 @@ if busqueda:
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
     resultados = filtrado[columnas].head(10)
+    resultados = resultados.fillna("-")
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
