@@ -76,8 +76,26 @@ if st.button("🔄 Actualizar datos"):
 # =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN/export?format=csv&gid=1001946414"
 
+if "refresh" not in st.session_state:
+    st.session_state.refresh = 0
+
+if st.button("🔄 Actualizar datos"):
+    st.session_state.refresh += 1
+
 @st.cache_data
-def cargar_datos():
+def cargar_datos(refresh):
+    df = pd.read_csv(URL_CSV)
+
+    df.columns = df.columns.str.strip()
+
+    df["_search"] = (
+        df.astype(str)
+        .fillna("")
+        .agg(" ".join, axis=1)
+        .str.lower()
+    )
+
+    return df
     df = pd.read_csv(URL_CSV)
 
     # Limpia nombres de columnas
