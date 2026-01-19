@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 
-# =========================
+# =========================FUNCIONA BN 
 # CONFIGURACIÓN GENERAL
 # =========================
 st.set_page_config(
@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILOS (PC + CELULAR)
+# ESTILOS OPTIMIZADOS CELULAR
 # =========================
 st.markdown("""
 <style>
@@ -23,7 +23,6 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* TABLA PC */
 table {
     width: 100% !important;
     font-size: 13px;
@@ -40,43 +39,9 @@ th {
     background-color: #f0f0f0;
 }
 
-/* LINKS */
 a {
     color: #1f77b4;
     text-decoration: underline;
-}
-
-/* TARJETAS CELULAR */
-.card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background-color: #fafafa;
-}
-
-.card-title {
-    font-weight: bold;
-    margin-bottom: 6px;
-}
-
-.card-item {
-    font-size: 14px;
-    margin-bottom: 4px;
-}
-
-/* OCULTAR TABLA EN CELULAR */
-@media (max-width: 768px) {
-    .desktop-only {
-        display: none;
-    }
-}
-
-/* OCULTAR TARJETAS EN PC */
-@media (min-width: 769px) {
-    .mobile-only {
-        display: none;
-    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -96,8 +61,11 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4k
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
 
+    columnas_busqueda = df.columns.tolist()
+
     df["_search"] = (
-        df.astype(str)
+        df[columnas_busqueda]
+        .astype(str)
         .apply(lambda x: " ".join(x), axis=1)
         .str.lower()
     )
@@ -107,7 +75,7 @@ def cargar_datos():
 df = cargar_datos()
 
 # =========================
-# FUNCIÓN LINKS
+# FUNCIÓN PARA LINKS
 # =========================
 def hacer_links(df):
     df = df.copy()
@@ -120,13 +88,16 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA
+# NORMALIZAR BÚSQUEDA (URL FB)
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
+
+    # Detectar link de Facebook Marketplace
     match = re.search(r"item/(\d+)", texto)
     if match:
-        return match.group(1)
+        return match.group(1)  # devuelve solo el ID
+
     return texto
 
 # =========================
@@ -144,40 +115,19 @@ if busqueda:
     texto = normalizar_busqueda(busqueda)
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
-    columnas_nombres = df.columns[columnas_fijas]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas_nombres].head(10)
+
+    resultados = filtrado.iloc[:, columnas_fijas].head(10)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
 
-        # ===== TABLA (PC)
-        tabla = hacer_links(resultados)
+        resultados = hacer_links(resultados)
+
         st.markdown(
-            f"<div class='desktop-only'>{tabla.to_html(index=False, escape=False)}</div>",
+            f"<div style='overflow-x:auto'>{resultados.to_html(index=False, escape=False)}</div>",
             unsafe_allow_html=True
         )
-
-        # ===== TARJETAS (CELULAR)
-        st.markdown("<div class='mobile-only'>", unsafe_allow_html=True)
-
-        for _, fila in resultados.iterrows():
-            st.markdown(f"""
-            <div class="card">
-                <div class="card-title">{fila[columnas_nombres[0]]}</div>
-                <div class="card-item"><b>{columnas_nombres[1]}:</b> {fila[columnas_nombres[1]]}</div>
-                <div class="card-item"><b>{columnas_nombres[2]}:</b> {fila[columnas_nombres[2]]}</div>
-                <div class="card-item"><b>{columnas_nombres[3]}:</b> {fila[columnas_nombres[3]]}</div>
-                <div class="card-item"><b>{columnas_nombres[4]}:</b> {fila[columnas_nombres[4]]}</div>
-                <div class="card-item"><b>{columnas_nombres[5]}:</b>
-                    {fila[columnas_nombres[5]] if not str(fila[columnas_nombres[5]]).startswith("http")
-                    else f"<a href='{fila[columnas_nombres[5]]}' target='_blank'>Abrir enlace</a>"}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
     else:
         st.warning("No se encontraron resultados")
