@@ -34,7 +34,7 @@ st.markdown("""
 /* Tabla */
 table {
     width: 100%;
-    min-width: 720px;   /* fuerza scroll en celular */
+    min-width: 720px;
     font-size: 13px;
     border-collapse: collapse;
 }
@@ -64,7 +64,7 @@ st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsa
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 # =========================
-# CARGA DE DATOS
+# CARGA DE DATOS (ANTI CACHE DRIVE)
 # =========================
 URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=507673529&single=true&output=csv"
 URL_CSV = f"{URL_BASE}&v={int(time.time() // 300)}"
@@ -75,7 +75,6 @@ def cargar_datos():
     try:
         df = pd.read_csv(URL_CSV)
         df.to_csv(CACHE_LOCAL, index=False)
-
     except Exception:
         if os.path.exists(CACHE_LOCAL):
             df = pd.read_csv(CACHE_LOCAL)
@@ -106,7 +105,7 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA (FB)
+# NORMALIZAR BÚSQUEDA (FACEBOOK)
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
@@ -133,8 +132,7 @@ if busqueda:
     columnas = df.columns[columnas_fijas]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas].head(10)
-    resultados = resultados.fillna("-")
+    resultados = filtrado[columnas].head(10).fillna("-")
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
