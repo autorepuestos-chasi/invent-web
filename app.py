@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-# =========================ESTE ULTIMO BUENO
+# =========================prueba
 # CONFIGURACIÓN GENERAL
 # =========================
 st.set_page_config(
@@ -119,15 +119,11 @@ busqueda = st.text_input(
 )
 
 # =========================
-# RESULTADOS (TABLA HTML FIJA)
-# =========================
-# =========================
 # RESULTADOS (BUSCADOR RÁPIDO)
 # =========================
 if busqueda:
-    texto = busqueda.lower().strip()
+    texto = normalizar_busqueda(busqueda)
 
-    # Columnas fijas visibles
     columnas_fijas = [0, 6, 8, 7, 2, 11]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
