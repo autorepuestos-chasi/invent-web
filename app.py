@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILOS
+# ESTILOS (SCROLL RESPONSIVE)
 # =========================
 st.markdown("""
 <style>
@@ -59,35 +59,29 @@ st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsa
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 # =========================
-# URL GOOGLE SHEETS (CSV)
+# LINK CSV PUBLICADO (CORRECTO)
 # =========================
-URL_CSV = (
-    "https://docs.google.com/spreadsheets/d/"
-    "12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN"
-    "/export?format=csv&gid=1001946414"
-)
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1171023241&single=true&output=csv"
 
 # =========================
-# BOTÓN ACTUALIZAR
+# BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
 
 # =========================
-# CARGA DE DATOS
+# CARGA DE DATOS (ESTABLE)
 # =========================
 @st.cache_data(ttl=600)
 def cargar_datos():
-    try:
-        df = pd.read_csv(URL_CSV)
-    except Exception as e:
-        st.error("❌ No se pudo cargar la base de datos desde Google Sheets")
-        st.stop()
+    df = pd.read_csv(URL_CSV)
 
+    # Limpieza
     df.columns = df.columns.str.strip()
     df = df.fillna("-")
 
+    # Columna búsqueda
     df["_search"] = (
         df.astype(str)
         .agg(" ".join, axis=1)
@@ -112,7 +106,7 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA
+# NORMALIZAR BÚSQUEDA (FB)
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
@@ -136,6 +130,8 @@ if busqueda:
     texto = normalizar_busqueda(busqueda)
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
+
+    # Evita error si cambian columnas
     columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
