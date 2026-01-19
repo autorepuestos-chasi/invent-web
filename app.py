@@ -60,7 +60,8 @@ a {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
-
+if "ultima_actualizacion" in st.session_state:
+    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 # =========================
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
@@ -75,8 +76,6 @@ with col2:
     if st.button("🔄 Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
-if "ultima_actualizacion" in st.session_state:
-    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 # =========================
 # CARGA DE DATOS (ESTABLE)
 # =========================
