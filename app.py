@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import re
 import time
+from datetime import datetime
+import pytz
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -94,8 +96,13 @@ def cargar_datos():
         .str.lower()
     )
 
-    st.session_state["ultima_actualizacion"] = time.strftime(
-    "%d/%m/%Y %H:%M:%S"
+    zona_ec = pytz.timezone("America/Guayaquil")
+
+    st.session_state["ultima_actualizacion"] = (
+    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
+    )
+
+
     )
 
     return df
