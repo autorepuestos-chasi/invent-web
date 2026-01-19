@@ -64,12 +64,13 @@ busqueda = st.text_input(
 )
 
 # =========================
-# RESULTADOS
+# RESULTADOS (TABLA FIJA)
 # =========================
 if busqueda:
     texto = busqueda.lower().strip()
 
-    columnas_fijas = [0, 6, 8, 7, 2, 11]
+    # Columnas fijas (SIN columna 0)
+    columnas_fijas = [6, 8, 7, 2, 11]
 
     filtrado = df[
         df.astype(str)
@@ -77,15 +78,10 @@ if busqueda:
         .any(axis=1)
     ]
 
-    resultados = filtrado.iloc[:, columnas_fijas]
+    resultados = filtrado.iloc[:, columnas_fijas].head(10)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-
-        st.dataframe(
-            resultados.head(10),
-            use_container_width=True,
-            height=380
-        )
+        st.table(resultados)
     else:
         st.warning("No se encontraron resultados")
