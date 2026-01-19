@@ -85,8 +85,7 @@ def cargar_datos():
 
     return df
 
-df = cargar_datos(int(time.time() // 60))
-
+df = cargar_datos()
 
 # =========================
 # LINKS CLICKEABLES
