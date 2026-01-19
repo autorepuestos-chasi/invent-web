@@ -1,65 +1,89 @@
 import streamlit as st
 import pandas as pd
 
-# ---------------- CONFIGURACIÓN ----------------
+# =========================
+# CONFIGURACIÓN GENERAL
+# =========================
 st.set_page_config(
     page_title="AutoRepuestos Chasi",
-    layout="wide"
+    page_icon="🚗",
+    layout="centered"
 )
 
+# =========================
+# ESTILOS PARA CELULAR
+# =========================
+st.markdown("""
+<style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
+    }
+    input {
+        font-size: 18px !important;
+    }
+    .stDataFrame {
+        font-size: 14px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
+# TÍTULO
+# =========================
+st.markdown(
+    "<h2 style='text-align:center;'>🔍 Buscador de Repuestos</h2>",
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    "<p style='text-align:center;'>AutoRepuestos Chasi</p>",
+    unsafe_allow_html=True
+)
+
+# =========================
+# CARGA DE DATOS (DESDE DRIVE)
+# =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
-COLUMNAS = [0, 6, 8, 7, 2, 11]
 
-# ---------------- CARGA ----------------
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=300)
 def cargar_datos():
-    df = pd.read_csv(URL_CSV)
-    df = df.iloc[:, COLUMNAS]
-
-    df["_search"] = (
-        df.astype(str)
-        .agg(" ".join, axis=1)
-        .str.lower()
-    )
-    return df
+    return pd.read_csv(URL_CSV)
 
 df = cargar_datos()
 
-# ---------------- INTERFAZ ----------------
-st.title("🔍 AutoRepuestos Chasi")
-
+# =========================
+# BUSCADOR
+# =========================
 busqueda = st.text_input(
-    "Buscar",
-    placeholder="Escribe y presiona ENTER",
+    "🔎 Escribe lo que estás buscando",
+    placeholder="Ej: bujía, filtro, Toyota...",
 )
 
-# ---------------- BÚSQUEDA ----------------
+# =========================
+# RESULTADOS
+# =========================
 if busqueda:
-    palabras = busqueda.lower().split()
+    busqueda = busqueda.lower()
 
-    if "and" in palabras:
-        palabras = [p for p in palabras if p != "and"]
-        mask = df["_search"].apply(lambda x: all(p in x for p in palabras))
-    elif "or" in palabras:
-        palabras = [p for p in palabras if p != "or"]
-        mask = df["_search"].apply(lambda x: any(p in x for p in palabras))
-    else:
-        mask = df["_search"].str.contains(busqueda.lower(), na=False)
+    resultados = df[
+        df.astype(str)
+        .apply(lambda x: x.str.lower().str.contains(busqueda))
+        .any(axis=1)
+    ]
 
-    resultados = df[mask].drop(columns="_search").head(500)
+    columnas_mostrar = [0, 6, 8, 7, 2, 11]
+    resultados = resultados.iloc[:, columnas_mostrar]
 
-    st.write(f"Resultados: {len(resultados)}")
+    st.markdown(f"**Resultados encontrados:** {len(resultados)}")
 
-    # Tabla responsive
     st.dataframe(
-        resultados,
+        resultados.head(50),
         use_container_width=True,
-        hide_index=True,
-        column_config={
-            col: st.column_config.LinkColumn(col)
-            for col in resultados.columns
-            if resultados[col].astype(str).str.startswith("http").any()
-        }
+        height=500
     )
 else:
-    st.info("¡Hoy es el mejor dia¡")
+    st.info("👆 Escribe algo para comenzar la búsqueda")
