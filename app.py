@@ -100,8 +100,6 @@ def cargar_datos():
 
     st.session_state["ultima_actualizacion"] = (
     datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-    )
-
 
     )
 
