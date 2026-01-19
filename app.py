@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import re
+import os
 
-# =========================ULTIMO
+# =========================
 # CONFIGURACIÓN GENERAL
 # =========================
 st.set_page_config(
@@ -65,15 +66,26 @@ st.markdown("<p style='text-align:center;'>AutoRepuestos Chasi</p>", unsafe_allo
 # CARGA DE DATOS
 # =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
+CACHE_LOCAL = "cache_datos.csv"
 
 @st.cache_data(ttl=300)
 def cargar_datos():
-    df = pd.read_csv(URL_CSV)
+    try:
+        df = pd.read_csv(URL_CSV)
+        df.to_csv(CACHE_LOCAL, index=False)
+
+    except Exception:
+        if os.path.exists(CACHE_LOCAL):
+            df = pd.read_csv(CACHE_LOCAL)
+        else:
+            raise RuntimeError("No se pudo cargar la base de datos")
+
     df["_search"] = (
         df.astype(str)
         .apply(lambda x: " ".join(x), axis=1)
         .str.lower()
     )
+
     return df
 
 df = cargar_datos()
