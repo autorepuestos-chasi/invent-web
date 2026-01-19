@@ -74,30 +74,24 @@ if st.button("🔄 Actualizar datos"):
 # =========================
 # CARGA DE DATOS (ENDPOINT ESTABLE)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN/export?format=csv&gid=45200806"
+URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN/export?format=csv&gid=1001946414"
 
-@st.cache_data(ttl=600)
+@st.cache_data
 def cargar_datos():
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    df = pd.read_csv(URL_CSV)
 
-    response = requests.get(URL_CSV, headers=headers, timeout=30)
+    # Limpia nombres de columnas
+    df.columns = df.columns.str.strip()
 
-    if response.status_code != 200:
-        raise RuntimeError("❌ No se pudo cargar la base de datos desde Google Drive")
-
-    df = pd.read_csv(StringIO(response.text))
-    df = df.fillna("-")
-
+    # Crear columna de búsqueda segura
     df["_search"] = (
         df.astype(str)
-        .apply(lambda x: " ".join(x), axis=1)
+        .fillna("")
+        .agg(" ".join, axis=1)
         .str.lower()
     )
 
     return df
-
 df = cargar_datos()
 # =========================
 # LINKS CLICKEABLES
