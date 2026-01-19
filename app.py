@@ -34,7 +34,7 @@ st.markdown("<p style='text-align:center;'>AutoRepuestos Chasi</p>", unsafe_allo
 # =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=10)
 def cargar_datos():
     return pd.read_csv(URL_CSV)
 
