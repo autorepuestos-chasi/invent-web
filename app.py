@@ -69,7 +69,18 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4k
 
 @st.cache_data(ttl=300)
 def cargar_datos():
-    return pd.read_csv(URL_CSV)
+    df = pd.read_csv(URL_CSV)
+
+    columnas_busqueda = df.columns.tolist()
+
+    df["_search"] = (
+        df[columnas_busqueda]
+        .astype(str)
+        .apply(lambda x: " ".join(x), axis=1)
+        .str.lower()
+    )
+
+    return df
 
 df = cargar_datos()
 
