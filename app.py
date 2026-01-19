@@ -67,7 +67,7 @@ st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=Tr
 # CARGA DE DATOS (ANTI CACHE DRIVE)
 # =========================
 URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=507673529&single=true&output=csv"
-URL_CSV = f"{URL_BASE}&v={int(time.time() // 300)}"
+URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
 CACHE_LOCAL = "cache_datos.csv"
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -89,7 +89,7 @@ def cargar_datos(cache_buster: int):
 
     return df
 
-df = cargar_datos(int(time.time() // 300))
+df = cargar_datos(int(time.time() // 60))
 
 
 # =========================
