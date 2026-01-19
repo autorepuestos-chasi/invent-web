@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 import os
+import time
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -65,7 +66,8 @@ st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=Tr
 # =========================
 # CARGA DE DATOS
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
+URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=507673529&single=true&output=csv"
+URL_CSV = f"{URL_BASE}&v={int(time.time() // 300)}"
 CACHE_LOCAL = "cache_datos.csv"
 
 @st.cache_data(ttl=60)
