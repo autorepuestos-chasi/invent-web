@@ -98,6 +98,19 @@ def hacer_links(df):
     return df
 
 # =========================
+# NORMALIZAR BÚSQUEDA (URL FB)
+# =========================
+def normalizar_busqueda(texto):
+    texto = texto.strip().lower()
+
+    # Detectar link de Facebook Marketplace
+    match = re.search(r"item/(\d+)", texto)
+    if match:
+        return match.group(1)  # devuelve solo el ID
+
+    return texto
+
+# =========================
 # BUSCADOR
 # =========================
 busqueda = st.text_input(
