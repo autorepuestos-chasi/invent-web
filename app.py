@@ -102,7 +102,7 @@ def hacer_links(df):
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: bujía, filtro, Toyota..."
+    placeholder="Ej: AA23"
 )
 
 # =========================
@@ -114,8 +114,8 @@ busqueda = st.text_input(
 if busqueda:
     texto = busqueda.lower().strip()
 
-    # Columnas fijas visibles (SIN columna 0)
-    columnas_fijas = [6, 8, 7, 2, 11]
+    # Columnas fijas visibles
+    columnas_fijas = [0, 6, 8, 7, 2, 11]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
 
