@@ -108,17 +108,16 @@ busqueda = st.text_input(
 # =========================
 # RESULTADOS (TABLA HTML FIJA)
 # =========================
+# =========================
+# RESULTADOS (BUSCADOR RÁPIDO)
+# =========================
 if busqueda:
     texto = busqueda.lower().strip()
 
-    # Columnas fijas (SIN columna 0)
+    # Columnas fijas visibles (SIN columna 0)
     columnas_fijas = [6, 8, 7, 2, 11]
 
-    filtrado = df[
-        df.astype(str)
-        .apply(lambda x: x.str.lower().str.contains(texto))
-        .any(axis=1)
-    ]
+    filtrado = df[df["_search"].str.contains(texto, na=False)]
 
     resultados = filtrado.iloc[:, columnas_fijas].head(10)
 
