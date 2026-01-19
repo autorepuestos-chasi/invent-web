@@ -16,7 +16,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 1rem;
+        padding-top: 2.5rem;
         padding-bottom: 1rem;
         padding-left: 1rem;
         padding-right: 1rem;
@@ -67,23 +67,25 @@ busqueda = st.text_input(
 # RESULTADOS
 # =========================
 if busqueda:
-    busqueda = busqueda.lower()
+    texto = busqueda.lower().strip()
 
-    resultados = df[
+    columnas_fijas = [0, 6, 8, 7, 2, 11]
+
+    filtrado = df[
         df.astype(str)
-        .apply(lambda x: x.str.lower().str.contains(busqueda))
+        .apply(lambda x: x.str.lower().str.contains(texto))
         .any(axis=1)
     ]
 
-    columnas_mostrar = [0, 6, 8, 7, 2, 11]
-    resultados = resultados.iloc[:, columnas_mostrar]
+    resultados = filtrado.iloc[:, columnas_fijas]
 
-    st.markdown(f"**Resultados encontrados:** {len(resultados)}")
+    if not resultados.empty:
+        st.markdown(f"**Resultados encontrados:** {len(resultados)}")
 
-    st.dataframe(
-        resultados.head(50),
-        use_container_width=True,
-        height=500
-    )
-else:
-    st.info("👆 Escribe algo para comenzar la búsqueda")
+        st.dataframe(
+            resultados.head(10),
+            use_container_width=True,
+            height=380
+        )
+    else:
+        st.warning("No se encontraron resultados")
