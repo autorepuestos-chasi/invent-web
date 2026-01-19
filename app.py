@@ -59,7 +59,7 @@ a {
 # =========================
 # TÍTULO
 # =========================
-st.markdown("<h2 style='text-align:center;'>🚗 AUTOREPUESTOS CHASI</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 # =========================
