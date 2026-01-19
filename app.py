@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import re
-import os
-import time
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -62,20 +60,26 @@ a {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+
+# =========================
+# BOTÓN MANUAL DE ACTUALIZACIÓN
+# =========================
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
 
 # =========================
-# CARGA DE DATOS (ANTI CACHE DRIVE)
+# CARGA DE DATOS (ENDPOINT ESTABLE)
 # =========================
-URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=507673529&single=true&output=csv"
-URL_CSV = f"{URL_BASE}&v={int(time.time() // 60)}"
-CACHE_LOCAL = "cache_datos.csv"
+URL_CSV = "https://docs.google.com/spreadsheets/d/TU_SPREADSHEET_ID/export?format=csv&gid=507673529"
 
 @st.cache_data(ttl=600)
 def cargar_datos():
-    df = pd.read_csv(URL_BASE)
+    try:
+        df = pd.read_csv(URL_CSV)
+    except Exception:
+        st.error("❌ No se pudo cargar la base de datos desde Google Drive")
+        st.stop()
 
     df["_search"] = (
         df.astype(str)
