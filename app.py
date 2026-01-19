@@ -68,7 +68,7 @@ st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=Tr
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
 CACHE_LOCAL = "cache_datos.csv"
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=60)
 def cargar_datos():
     try:
         df = pd.read_csv(URL_CSV)
