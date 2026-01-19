@@ -15,19 +15,35 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-    .block-container {
-        padding-top: 2.5rem;
-        padding-bottom: 1rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        max-width: 100%;
-    }
-    input {
-        font-size: 18px !important;
-    }
-    .stDataFrame {
-        font-size: 14px;
-    }
+/* Contenedor centrado */
+.main {
+    max-width: 100%;
+}
+
+/* Tabla responsive */
+table {
+    width: 100% !important;
+    font-size: 14px;
+    border-collapse: collapse;
+}
+
+/* Celdas */
+th, td {
+    padding: 6px 8px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+/* Encabezados */
+th {
+    background-color: #f2f2f2;
+}
+
+/* Links */
+a {
+    color: #1f77b4;
+    text-decoration: underline;
+}
 </style>
 """, unsafe_allow_html=True)
 
