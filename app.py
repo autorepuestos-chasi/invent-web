@@ -86,6 +86,8 @@ def cargar_datos():
     )
 
     return df
+
+df = cargar_datos()
 # =========================
 # LINKS CLICKEABLES
 # =========================
