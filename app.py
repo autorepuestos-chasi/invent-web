@@ -83,7 +83,10 @@ if busqueda:
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-        resultados = resultados.reset_index(drop=True)
-        st.table(resultados)
+        st.markdown(
+            resultados.to_html(index=False),
+            unsafe_allow_html=True
+)
+
     else:
         st.warning("No se encontraron resultados")
