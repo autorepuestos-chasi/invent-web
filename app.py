@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
+import re
 
-# =========================ESTE ULTIMO BUENO
+# =========================
 # CONFIGURACIÓN GENERAL
 # =========================
 st.set_page_config(
@@ -22,26 +23,22 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* Tabla limpia y centrada */
 table {
     width: 100% !important;
     font-size: 13px;
     border-collapse: collapse;
 }
 
-/* Celdas */
 th, td {
     padding: 6px;
     text-align: left;
     word-break: break-word;
 }
 
-/* Encabezados */
 th {
     background-color: #f0f0f0;
 }
 
-/* Links */
 a {
     color: #1f77b4;
     text-decoration: underline;
@@ -52,15 +49,8 @@ a {
 # =========================
 # TÍTULO
 # =========================
-st.markdown(
-    "<h2 style='text-align:center;'>🔍 Buscador de Repuestos</h2>",
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    "<p style='text-align:center;'>AutoRepuestos Chasi</p>",
-    unsafe_allow_html=True
-)
+st.markdown("<h2 style='text-align:center;'>🔍 Buscador de Repuestos</h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;'>AutoRepuestos Chasi</p>", unsafe_allow_html=True)
 
 # =========================
 # CARGA DE DATOS
@@ -98,20 +88,32 @@ def hacer_links(df):
     return df
 
 # =========================
+# NORMALIZAR BÚSQUEDA (URL FB)
+# =========================
+def normalizar_busqueda(texto):
+    texto = texto.strip().lower()
+
+    # Detectar link de Facebook Marketplace
+    match = re.search(r"item/(\d+)", texto)
+    if match:
+        return match.group(1)  # devuelve solo el ID
+
+    return texto
+
+# =========================
 # BUSCADOR
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: AA32"
+    placeholder="Ej: AA23 o pega un link de Facebook"
 )
 
 # =========================
-# RESULTADOS (BUSCADOR RÁPIDO)
+# RESULTADOS
 # =========================
 if busqueda:
-    texto = busqueda.lower().strip()
+    texto = normalizar_busqueda(busqueda)
 
-    # Columnas fijas visibles
     columnas_fijas = [0, 6, 8, 7, 2, 11]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
