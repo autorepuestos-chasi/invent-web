@@ -65,7 +65,7 @@ st.markdown(
 # =========================
 # CARGA DE DATOS
 # =========================
-URL_CSV = "aqui la url"
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
 
 @st.cache_data(ttl=300)
 def cargar_datos():
