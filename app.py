@@ -1,16 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-def hacer_links(df):
-    df = df.copy()
-    for col in df.columns:
-        df[col] = df[col].apply(
-            lambda x: f'<a href="{x}" target="_blank">{x}</a>'
-            if isinstance(x, str) and x.startswith("http")
-            else x
-        )
-    return df
-
 # =========================
 # CONFIGURACIÓN GENERAL
 # =========================
@@ -21,32 +11,34 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILOS PARA CELULAR
+# ESTILOS OPTIMIZADOS CELULAR
 # =========================
 st.markdown("""
 <style>
-/* Contenedor centrado */
-.main {
+.block-container {
+    padding-top: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     max-width: 100%;
 }
 
-/* Tabla responsive */
+/* Tabla limpia y centrada */
 table {
     width: 100% !important;
-    font-size: 14px;
+    font-size: 13px;
     border-collapse: collapse;
 }
 
 /* Celdas */
 th, td {
-    padding: 6px 8px;
+    padding: 6px;
     text-align: left;
-    word-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Encabezados */
 th {
-    background-color: #f2f2f2;
+    background-color: #f0f0f0;
 }
 
 /* Links */
@@ -71,9 +63,9 @@ st.markdown(
 )
 
 # =========================
-# CARGA DE DATOS (DESDE DRIVE)
+# CARGA DE DATOS
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=507673529&single=true&output=csv"
+URL_CSV = "aqui la url"
 
 @st.cache_data(ttl=300)
 def cargar_datos():
@@ -82,21 +74,34 @@ def cargar_datos():
 df = cargar_datos()
 
 # =========================
+# FUNCIÓN PARA LINKS
+# =========================
+def hacer_links(df):
+    df = df.copy()
+    for col in df.columns:
+        df[col] = df[col].apply(
+            lambda x: f'<a href="{x}" target="_blank">{x}</a>'
+            if isinstance(x, str) and x.startswith("http")
+            else x
+        )
+    return df
+
+# =========================
 # BUSCADOR
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: bujía, filtro, Toyota...",
+    placeholder="Ej: bujía, filtro, Toyota..."
 )
 
 # =========================
-# RESULTADOS (TABLA FIJA)
+# RESULTADOS (TABLA HTML FIJA)
 # =========================
 if busqueda:
     texto = busqueda.lower().strip()
 
-    # Columnas fijas 
-    columnas_fijas = [0, 6, 8, 7, 2, 11]
+    # Columnas fijas (SIN columna 0)
+    columnas_fijas = [6, 8, 7, 2, 11]
 
     filtrado = df[
         df.astype(str)
@@ -106,14 +111,14 @@ if busqueda:
 
     resultados = filtrado.iloc[:, columnas_fijas].head(10)
 
-
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-        st.markdown(
-            resultados.to_html(index=False),
-            unsafe_allow_html=True
-)
 
+        resultados = hacer_links(resultados)
+
+        st.markdown(
+            f"<div style='overflow-x:auto'>{resultados.to_html(index=False, escape=False)}</div>",
+            unsafe_allow_html=True
+        )
     else:
         st.warning("No se encontraron resultados")
-
