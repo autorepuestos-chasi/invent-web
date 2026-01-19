@@ -71,26 +71,13 @@ if st.button("🔄 Actualizar datos"):
 # =========================
 # CARGA DE DATOS (ENDPOINT ESTABLE)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/12CJmMjPZ8O9MG0OBq7v9t56i93mUHfzN/export?format=csv&gid=45200806"
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=121664199&single=true&output=csv"
 
 @st.cache_data(ttl=600)
 def cargar_datos():
-    try:
-        df = pd.read_csv(URL_CSV)
-    except Exception:
-        st.error("❌ No se pudo cargar la base de datos desde Google Drive")
-        st.stop()
-
-    df["_search"] = (
-        df.astype(str)
-        .apply(lambda x: " ".join(x), axis=1)
-        .str.lower()
-    )
-
-    return df
+    return pd.read_csv(URL_CSV)
 
 df = cargar_datos()
-
 # =========================
 # LINKS CLICKEABLES
 # =========================
