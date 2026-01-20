@@ -62,10 +62,11 @@ st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsa
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 if "ultima_actualizacion" in st.session_state:
     st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
+
 # =========================
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1080315084&single=true&output=csv"
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1819051604&single=true&output=csv"
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
@@ -76,6 +77,7 @@ with col2:
     if st.button("🔄 Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
+
 # =========================
 # CARGA DE DATOS (ESTABLE)
 # =========================
