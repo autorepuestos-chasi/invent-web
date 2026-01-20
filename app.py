@@ -66,7 +66,7 @@ if "ultima_actualizacion" in st.session_state:
 # =========================
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1080315084&single=true&output=csv"
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1711514116&single=true&output=csv"
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
