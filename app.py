@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
-import requests
-from io import StringIO
+import time
 from datetime import datetime
 import pytz
 
@@ -16,19 +15,12 @@ st.set_page_config(
 )
 
 # =========================
-# URL CSV (GOOGLE DRIVE PUBLICADO)
-# =========================
-URL_CSV = (
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1711514116&single=true&output=csv"
-)
-
-# =========================
-# ESTILOS
+# ESTILOS (SCROLL RESPONSIVE)
 # =========================
 st.markdown("""
 <style>
 .block-container {
-    padding-top: 2rem;
+    padding-top: 2.2rem;
     padding-left: 1rem;
     padding-right: 1rem;
     max-width: 100%;
@@ -68,60 +60,52 @@ a {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+if "ultima_actualizacion" in st.session_state:
+    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
 # =========================
-# BOTÓN ACTUALIZAR + INDICADOR
+# LINK CSV PUBLICADO (CORRECTO)
 # =========================
-col1, col2 = st.columns([1, 4])
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqvgoLkCTGBXrDPQgs4kIDa8YgZqk0lyMh9vJ8_IiipSRmJJN2kReZzsH8n8YCDg/pub?gid=1711514116&single=true&output=csv"
 
-with col1:
-    if st.button("🔄"):
+# =========================
+# BOTÓN ACTUALIZAR (ANTI BUG)
+# =========================
+col1, col2 = st.columns([3, 1])
+
+with col2:
+    if st.button("🔄 Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
 
-with col2:
-    st.caption("Actualizar datos")
-
 # =========================
-# CARGA DE DATOS ROBUSTA
+# CARGA DE DATOS (ESTABLE)
 # =========================
-@st.cache_data(show_spinner=False)
+@st.cache_data(ttl=600)
 def cargar_datos():
-    try:
-        r = requests.get(URL_CSV, timeout=10)
+    df = pd.read_csv(URL_CSV)
 
-        if r.status_code != 200:
-            raise ValueError("Google Drive no responde")
+    # Limpieza
+    df.columns = df.columns.str.strip()
+    df = df.fillna("-")
 
-        df = pd.read_csv(StringIO(r.text))
-        df.columns = df.columns.str.strip()
+    # Columna búsqueda
+    df["_search"] = (
+        df.astype(str)
+        .agg(" ".join, axis=1)
+        .str.lower()
+    )
 
-        # Columna de búsqueda segura
-        df["_search"] = (
-            df.astype(str)
-            .fillna("")
-            .agg(" ".join, axis=1)
-            .str.lower()
-        )
+    zona_ec = pytz.timezone("America/Guayaquil")
 
-        return df, True
+    st.session_state["ultima_actualizacion"] = (
+    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
 
-    except Exception:
-        return None, False
+    )
 
-df, online = cargar_datos()
+    return df
 
-# =========================
-# ESTADO ONLINE / OFFLINE
-# =========================
-zona_ec = pytz.timezone("America/Guayaquil")
-hora_actual = datetime.now(zona_ec).strftime("%H:%M:%S")
-
-if online:
-    st.success(f"🟢 Datos actualizados correctamente — {hora_actual}")
-else:
-    st.warning("🟡 Google Drive está sincronizando. Intenta nuevamente en unos segundos.")
-    st.stop()
+df = cargar_datos()
 
 # =========================
 # LINKS CLICKEABLES
@@ -137,7 +121,7 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA (FACEBOOK)
+# NORMALIZAR BÚSQUEDA (FB)
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
@@ -151,7 +135,7 @@ def normalizar_busqueda(texto):
 # =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: código, descripción o link de Facebook"
+    placeholder="Ej: AA23 o pega un link de Facebook"
 )
 
 # =========================
@@ -161,10 +145,13 @@ if busqueda:
     texto = normalizar_busqueda(busqueda)
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
+
+    # Evita error si cambian columnas
+    columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
     filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas].head(10).fillna("-")
+    resultados = filtrado[columnas].head(10)
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
