@@ -81,7 +81,7 @@ with col2:
 # =========================
 # CARGA DE DATOS (ESTABLE)
 # =========================
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=900)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
 
