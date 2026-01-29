@@ -13,7 +13,8 @@ st.set_page_config(
     page_icon="🚗",
     layout="centered"
 )
-
+with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
+    time.sleep(0.8)
 # =========================
 # ESTILOS (SCROLL RESPONSIVE)
 # =========================
@@ -81,7 +82,7 @@ with col2:
 # =========================
 # CARGA DE DATOS (ESTABLE)
 # =========================
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=10800)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
 
