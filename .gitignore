@@ -3,3 +3,4 @@ __pycache__/
 .env
 .DS_Store
 editar_url.ps1
+desktop.ini
