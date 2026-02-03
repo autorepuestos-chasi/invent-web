@@ -68,7 +68,7 @@ if "ultima_actualizacion" in st.session_state:
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
 
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1602863948&single=true&output=csv" # AUTO_EDIT
+URL_CSV = "hhj" # AUTO_EDIT
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
@@ -83,7 +83,7 @@ with col2:
 # =========================
 # CARGA DE DATOS (ESTABLE)
 # =========================
-@st.cache_data(ttl=10800)
+@st.cache_data(ttl=18000)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
 
@@ -166,6 +166,7 @@ if busqueda:
         )
     else:
         st.warning("No se encontraron resultados")
+
 
 
 
