@@ -203,3 +203,8 @@ if busqueda:
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> bf6ee11dfc85a805801c0765cefef3356495f9a2
