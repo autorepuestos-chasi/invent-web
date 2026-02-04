@@ -68,7 +68,7 @@ if "ultima_actualizacion" in st.session_state:
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
 
-URL_CSV = "ygyhj" # AUTO_EDIT
+URL_CSV = "hjhsjahsj" # AUTO_EDIT
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
@@ -208,3 +208,4 @@ if busqueda:
 
 
 >>>>>>> bf6ee11dfc85a805801c0765cefef3356495f9a2
+
