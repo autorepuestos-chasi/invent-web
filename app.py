@@ -68,7 +68,7 @@ if "ultima_actualizacion" in st.session_state:
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
 
-URL_CSV = "huuu" # AUTO_EDIT
+URL_CSV = "nuhuhu" # AUTO_EDIT
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
@@ -166,6 +166,7 @@ if busqueda:
         )
     else:
         st.warning("No se encontraron resultados")
+
 
 
 
