@@ -13,13 +13,17 @@ st.set_page_config(
     page_icon="🚗",
     layout="centered"
 )
+
 with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
     time.sleep(0.8)
+
 # =========================
-# ESTILOS (SCROLL RESPONSIVE)
+# ESTILOS (RESPONSIVE)
 # =========================
 st.markdown("""
 <style>
+
+/* Layout general */
 .block-container {
     padding-top: 2.2rem;
     padding-left: 1rem;
@@ -27,6 +31,7 @@ st.markdown("""
     max-width: 100%;
 }
 
+/* Tabla responsive */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -53,30 +58,30 @@ a {
     color: #1f77b4;
     text-decoration: underline;
 }
-</style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-<style>
+/* ===== VISIBILIDAD POR DISPOSITIVO ===== */
+.solo-movil {
+    display: none;
+}
 
-/* ----- SOLO CELULAR ----- */
+.solo-pc {
+    display: block;
+}
+
+/* ===== SOLO CELULAR ===== */
 @media (max-width: 768px) {
 
-    /* Oculta el texto INVENTARIO */
-    #titulo-inventario {
+    .solo-pc {
         display: none;
     }
 
-    /* Mueve el botón al lugar del título */
-    #boton-actualizar {
+    .solo-movil {
         display: flex;
         justify-content: center;
-        margin-top: -10px;
         margin-bottom: 15px;
     }
 
-    /* Botón compacto y seguro */
-    #boton-actualizar .stButton > button {
+    .solo-movil .stButton > button {
         height: 38px;
         padding: 0 14px;
         font-size: 0.9rem;
@@ -88,45 +93,49 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# TÍTULO
+# TÍTULO + BOTÓN (RESPONSIVE)
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
+
+# Contenedor común
+st.markdown('<div>', unsafe_allow_html=True)
+
+# TEXTO SOLO PC
 st.markdown(
-    "<p id='titulo-inventario' style='text-align:center;'>INVENTARIO</p>",
+    "<p class='solo-pc' style='text-align:center;'>INVENTARIO</p>",
     unsafe_allow_html=True
 )
-if "ultima_actualizacion" in st.session_state:
-    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
-# =========================
-# LINK CSV PUBLICADO (CORRECTO)
-# =========================
-
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
-
-# =========================
-# BOTÓN ACTUALIZAR (ANTI BUG)
-# =========================
-st.markdown('<div id="boton-actualizar">', unsafe_allow_html=True)
-
+# BOTÓN SOLO MÓVIL
+st.markdown('<div class="solo-movil">', unsafe_allow_html=True)
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
-# CARGA DE DATOS (ESTABLE)
+# ESTADO DE DATOS
+# =========================
+if "ultima_actualizacion" in st.session_state:
+    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
+
+# =========================
+# LINK CSV
+# =========================
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv"
+
+# =========================
+# CARGA DE DATOS
 # =========================
 @st.cache_data(ttl=18000)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
 
-    # Limpieza
     df.columns = df.columns.str.strip()
     df = df.fillna("-")
 
-    # Columna búsqueda
     df["_search"] = (
         df.astype(str)
         .agg(" ".join, axis=1)
@@ -134,10 +143,8 @@ def cargar_datos():
     )
 
     zona_ec = pytz.timezone("America/Guayaquil")
-
     st.session_state["ultima_actualizacion"] = (
-    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-
+        datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
     )
 
     return df
@@ -158,46 +165,9 @@ def hacer_links(df):
     return df
 
 # =========================
-# NORMALIZAR BÚSQUEDA (FB)
+# NORMALIZAR BÚSQUEDA
 # =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
     match = re.search(r"item/(\d+)", texto)
     if match:
-        return match.group(1)
-    return texto
-
-# =========================
-# BUSCADOR
-# =========================
-busqueda = st.text_input(
-    "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: AA23 o pega un link de Facebook"
-)
-
-# =========================
-# RESULTADOS
-# =========================
-if busqueda:
-    texto = normalizar_busqueda(busqueda)
-
-    columnas_fijas = [0, 6, 8, 7, 2, 11]
-
-    # Evita error si cambian columnas
-    columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
-    columnas = df.columns[columnas_fijas]
-
-    filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas].head(10)
-
-    if not resultados.empty:
-        st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-
-        resultados = hacer_links(resultados)
-
-        st.markdown(
-            f"<div class='table-scroll'>{resultados.to_html(index=False, escape=False)}</div>",
-            unsafe_allow_html=True
-        )
-    else:
-        st.warning("No se encontraron resultados")
