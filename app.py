@@ -14,57 +14,53 @@ st.set_page_config(
     layout="centered"
 )
 
-with st.spinner("⏳ Despertando la aplicación..."):
+with st.spinner("⏳ Cargando aplicación..."):
     time.sleep(0.5)
 
 # =========================
-# ESTILOS CSS (MÓVIL Y ESCRITORIO)
+# ESTILOS CSS (MÉTODO DE ALTA PRECISIÓN)
 # =========================
 st.markdown("""
 <style>
-/* --- ESTILOS GENERALES --- */
-.block-container {
-    padding-top: 2rem;
-    max-width: 100%;
-}
-.table-scroll {
-    overflow-x: auto;
-}
-table {
-    width: 100%;
-    min-width: 700px;
-    font-size: 13px;
-}
+/* Estilos para PC */
+.block-container { padding-top: 2rem; max-width: 100%; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; min-width: 700px; font-size: 13px; }
 
-/* --- SOLUCIÓN PARA MÓVILES --- */
-@media screen and (max-width: 800px) {
+/* --- AJUSTES PARA MÓVIL --- */
+@media screen and (max-width: 768px) {
     
-    /* 1. Ocultar el texto INVENTARIO */
-    .ocultar-movil {
+    /* 1. Desaparece el texto INVENTARIO */
+    .texto-inventario {
         display: none !important;
     }
 
-    /* 2. Forzar el centrado del botón */
-    /* Target a la columna que contiene el botón en móvil */
-    [data-testid="stColumn"] {
+    /* 2. Centrado forzado del botón */
+    /* Apuntamos directamente al contenedor que creamos abajo */
+    .contenedor-boton-movil {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 10px 0 !important;
+    }
+
+    /* Forzamos al componente interno de Streamlit a centrarse */
+    .contenedor-boton-movil div[data-testid="stButton"] {
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
-        text-align: center !important;
+    }
+    
+    /* Hacemos que el botón sea un poco más ancho para que se vea mejor en móvil */
+    .contenedor-boton-movil button {
+        width: 80% !important;
     }
 
-    /* Target al contenedor interno del botón */
-    [data-testid="stButton"] {
-        display: flex !important;
-        justify-content: center !important;
+    /* Aseguramos que la columna no lo pegue a la izquierda */
+    [data-testid="column"] {
         width: 100% !important;
-    }
-
-    /* Ajuste del botón para que no se vea pegado a los bordes */
-    [data-testid="stButton"] button {
-        width: auto !important;
-        min-width: 200px;
-        margin: 10px auto !important;
+        flex: 1 1 100% !important;
     }
 }
 </style>
@@ -75,26 +71,27 @@ table {
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 
-# Usamos la clase 'ocultar-movil' para que el CSS la detecte
-st.markdown("<p class='ocultar-movil' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+# Este texto se ocultará gracias a la clase 'texto-inventario'
+st.markdown("<p class='texto-inventario' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
-    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 Actualizado: {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
 
 # =========================
 # BOTÓN ACTUALIZAR
 # =========================
-# En escritorio, col1 ocupa el espacio y col2 pone el botón a la derecha.
-# En móvil, se apilan y el CSS arriba se encarga de centrar col2.
 col1, col2 = st.columns([3, 1])
 
 with col2:
+    # Envolvemos el botón en un DIV con nuestra clase especial
+    st.markdown('<div class="contenedor-boton-movil">', unsafe_allow_html=True)
     if st.button("🔄 Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
-# LÓGICA DE DATOS
+# CARGA Y LÓGICA DE DATOS
 # =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
 
@@ -104,14 +101,12 @@ def cargar_datos():
     df.columns = df.columns.str.strip()
     df = df.fillna("-")
     df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
-    
     zona_ec = pytz.timezone("America/Guayaquil")
     st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
     return df
 
 df = cargar_datos()
 
-# --- Funciones Auxiliares ---
 def hacer_links(df):
     df = df.copy()
     for col in df.columns:
@@ -122,31 +117,28 @@ def hacer_links(df):
         )
     return df
 
-def normalizar_busqueda(texto):
-    texto = texto.strip().lower()
-    match = re.search(r"item/(\d+)", texto)
-    return match.group(1) if match else texto
-
 # =========================
-# BUSCADOR Y RESULTADOS
+# BUSCADOR
 # =========================
-busqueda = st.text_input("🔎 Escribe lo que estás buscando", placeholder="Ej: AA23 o link de FB")
+busqueda = st.text_input("🔎 Buscador", placeholder="Escribe aquí...")
 
 if busqueda:
-    texto = normalizar_busqueda(busqueda)
+    texto = busqueda.strip().lower()
+    match = re.search(r"item/(\d+)", texto)
+    if match: texto = match.group(1)
+
     columnas_fijas = [0, 6, 8, 7, 2, 11]
     columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
-    columnas = df.columns[columnas_fijas]
-
+    
     filtrado = df[df["_search"].str.contains(texto, na=False)]
-    resultados = filtrado[columnas].head(10)
+    resultados = filtrado[df.columns[columnas_fijas]].head(10)
 
     if not resultados.empty:
-        st.write(f"Resultados: {len(resultados)}")
-        resultados_html = hacer_links(resultados)
+        st.markdown(f"**Resultados:** {len(resultados)}")
+        resultados_links = hacer_links(resultados)
         st.markdown(
-            f"<div class='table-scroll'>{resultados_html.to_html(index=False, escape=False)}</div>",
+            f"<div class='table-scroll'>{resultados_links.to_html(index=False, escape=False)}</div>",
             unsafe_allow_html=True
         )
     else:
-        st.warning("No se encontraron resultados")
+        st.warning("No encontrado")
