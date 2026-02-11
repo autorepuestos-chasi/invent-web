@@ -22,6 +22,8 @@ with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
 # =========================
 st.markdown("""
 <style>
+
+/* ======== CONTENEDOR GENERAL ======== */
 .block-container {
     padding-top: 2.2rem;
     padding-left: 1rem;
@@ -29,6 +31,7 @@ st.markdown("""
     max-width: 100%;
 }
 
+/* ======== TABLA ======== */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -56,15 +59,12 @@ a {
     text-decoration: underline;
 }
 
-/* BOTÓN EN PC */
-div.stButton {
-    display: flex;
+/* ======== BOTÓN PC (derecha) ======== */
+div[data-testid="stHorizontalBlock"] {
     justify-content: flex-end;
 }
 
-/* =========================
-   RESPONSIVE SOLO CELULAR
-========================= */
+/* ======== SOLO CELULAR ======== */
 @media (max-width: 768px) {
 
     /* Ocultar INVENTARIO */
@@ -73,8 +73,8 @@ div.stButton {
     }
 
     /* Centrar botón en móvil */
-    div.stButton {
-        justify-content: center;
+    div[data-testid="stHorizontalBlock"] {
+        justify-content: center !important;
     }
 
 }
