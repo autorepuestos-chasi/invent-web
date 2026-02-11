@@ -13,10 +13,12 @@ st.set_page_config(
     page_icon="🚗",
     layout="centered"
 )
+
 with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
     time.sleep(0.8)
+
 # =========================
-# ESTILOS (SCROLL RESPONSIVE)
+# ESTILOS GENERALES + RESPONSIVE
 # =========================
 st.markdown("""
 <style>
@@ -54,6 +56,12 @@ a {
     text-decoration: underline;
 }
 
+/* BOTÓN EN PC */
+div.stButton {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* =========================
    RESPONSIVE SOLO CELULAR
 ========================= */
@@ -64,9 +72,8 @@ a {
         display: none;
     }
 
-    /* Centrar SOLO el botón actualizar */
+    /* Centrar botón en móvil */
     div.stButton {
-        display: flex;
         justify-content: center;
     }
 
@@ -85,41 +92,19 @@ if "ultima_actualizacion" in st.session_state:
     st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
 # =========================
-# LINK CSV PUBLICADO (CORRECTO)
+# LINK CSV PUBLICADO
 # =========================
-
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv"
 
 # =========================
-# BOTÓN ACTUALIZAR (RESPONSIVE CORRECTO)
+# BOTÓN ACTUALIZAR
 # =========================
-
-st.markdown("""
-<style>
-
-/* PC: botón a la derecha */
-div.stButton {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* MÓVIL: centrar botón */
-@media (max-width: 768px) {
-    div.stButton {
-        justify-content: center;
-    }
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
 
-
 # =========================
-# CARGA DE DATOS (ESTABLE)
+# CARGA DE DATOS
 # =========================
 @st.cache_data(ttl=18000)
 def cargar_datos():
@@ -139,8 +124,7 @@ def cargar_datos():
     zona_ec = pytz.timezone("America/Guayaquil")
 
     st.session_state["ultima_actualizacion"] = (
-    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-
+        datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
     )
 
     return df
@@ -186,7 +170,6 @@ if busqueda:
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
 
-    # Evita error si cambian columnas
     columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
