@@ -54,8 +54,6 @@ a {
     text-decoration: underline;
 }
 
-
-========================= */
 /* =========================
    RESPONSIVE SOLO CELULAR
 ========================= */
@@ -73,7 +71,6 @@ a {
     }
 
 }
-
 
 </style>
 """, unsafe_allow_html=True)
