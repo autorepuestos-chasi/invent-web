@@ -13,99 +13,79 @@ st.set_page_config(
     page_icon="🚗",
     layout="centered"
 )
-with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
-    time.sleep(0.8)
+
+with st.spinner("⏳ Despertando la aplicación..."):
+    time.sleep(0.5)
 
 # =========================
-# ESTILOS (CORREGIDOS PARA MÓVIL)
+# ESTILOS CSS (MÓVIL Y ESCRITORIO)
 # =========================
 st.markdown("""
 <style>
-/* Estilos Base */
+/* --- ESTILOS GENERALES --- */
 .block-container {
-    padding-top: 2.2rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-top: 2rem;
     max-width: 100%;
 }
-
 .table-scroll {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
 }
-
 table {
     width: 100%;
-    min-width: 720px;
+    min-width: 700px;
     font-size: 13px;
-    border-collapse: collapse;
 }
 
-th, td {
-    padding: 6px 8px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-th {
-    background-color: #f0f0f0;
-}
-
-a {
-    color: #1f77b4;
-    text-decoration: underline;
-}
-
-/* =========================================
-   REGLAS ESPECÍFICAS PARA MÓVILES
-   ========================================= */
-@media only screen and (max-width: 768px) {
+/* --- SOLUCIÓN PARA MÓVILES --- */
+@media screen and (max-width: 800px) {
     
-    /* 1. Suprimir texto INVENTARIO */
-    .subtitulo-inventario {
+    /* 1. Ocultar el texto INVENTARIO */
+    .ocultar-movil {
         display: none !important;
     }
 
-    /* 2. Centrar el botón Actualizar Datos */
-    /* Apuntamos al contenedor de la columna que Streamlit genera */
-    [data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 calc(100%) !important;
+    /* 2. Forzar el centrado del botón */
+    /* Target a la columna que contiene el botón en móvil */
+    [data-testid="stColumn"] {
         display: flex !important;
         justify-content: center !important;
-        align-items: center !important;
+        width: 100% !important;
         text-align: center !important;
     }
 
-    /* Aseguramos que el botón no herede márgenes laterales */
+    /* Target al contenedor interno del botón */
     [data-testid="stButton"] {
-        display: flex;
-        justify-content: center;
-        width: 100%;
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    /* Ajuste del botón para que no se vea pegado a los bordes */
+    [data-testid="stButton"] button {
+        width: auto !important;
+        min-width: 200px;
+        margin: 10px auto !important;
     }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# TÍTULO
+# TÍTULO Y SUBTÍTULO
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
-# Clase agregada para ocultar en móviles
-st.markdown("<p class='subtitulo-inventario' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+
+# Usamos la clase 'ocultar-movil' para que el CSS la detecte
+st.markdown("<p class='ocultar-movil' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
-    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
-
-# =========================
-# LINK CSV PUBLICADO
-# =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
+    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
 
 # =========================
 # BOTÓN ACTUALIZAR
 # =========================
-# En móvil, estas columnas se apilan, por lo que el CSS anterior centrará la col2
+# En escritorio, col1 ocupa el espacio y col2 pone el botón a la derecha.
+# En móvil, se apilan y el CSS arriba se encarga de centrar col2.
 col1, col2 = st.columns([3, 1])
 
 with col2:
@@ -114,8 +94,10 @@ with col2:
         st.rerun()
 
 # =========================
-# CARGA DE DATOS
+# LÓGICA DE DATOS
 # =========================
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
+
 @st.cache_data(ttl=18000)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
@@ -129,7 +111,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-# (El resto del código de búsqueda y visualización se mantiene igual...)
+# --- Funciones Auxiliares ---
 def hacer_links(df):
     df = df.copy()
     for col in df.columns:
@@ -143,14 +125,12 @@ def hacer_links(df):
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
     match = re.search(r"item/(\d+)", texto)
-    if match:
-        return match.group(1)
-    return texto
+    return match.group(1) if match else texto
 
-busqueda = st.text_input(
-    "🔎 Escribe lo que estás buscando",
-    placeholder="Ej: AA23 o pega un link de Facebook"
-)
+# =========================
+# BUSCADOR Y RESULTADOS
+# =========================
+busqueda = st.text_input("🔎 Escribe lo que estás buscando", placeholder="Ej: AA23 o link de FB")
 
 if busqueda:
     texto = normalizar_busqueda(busqueda)
@@ -162,10 +142,10 @@ if busqueda:
     resultados = filtrado[columnas].head(10)
 
     if not resultados.empty:
-        st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-        resultados = hacer_links(resultados)
+        st.write(f"Resultados: {len(resultados)}")
+        resultados_html = hacer_links(resultados)
         st.markdown(
-            f"<div class='table-scroll'>{resultados.to_html(index=False, escape=False)}</div>",
+            f"<div class='table-scroll'>{resultados_html.to_html(index=False, escape=False)}</div>",
             unsafe_allow_html=True
         )
     else:
