@@ -64,12 +64,15 @@ a {
         display: none;
     }
 
-    /* Centrar botón actualizar */
-    .boton-actualizar {
+    /* Hacer que columnas se apilen */
+    div[data-testid="column"] {
+        width: 100% !important;
+    }
+
+    /* Centrar botón dentro de su columna */
+    div[data-testid="column"] > div {
         display: flex;
         justify-content: center;
-        width: 100%;
-        margin-top: 10px;
     }
 }
 
