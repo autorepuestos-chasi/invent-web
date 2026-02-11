@@ -15,63 +15,65 @@ st.set_page_config(
 )
 
 # =========================
-# EL "SUPER" CSS (SOLUCIÓN DEFINITIVA)
+# EL ÚLTIMO RECURSO: CSS ULTRA-ESPECÍFICO
 # =========================
 st.markdown("""
 <style>
-/* 1. ESTILOS PARA PC (Escritorio) */
+/* Estilos generales */
 .block-container { padding-top: 2rem; }
-.table-scroll { overflow-x: auto; }
 
-/* 2. ESTILOS SOLO PARA MÓVIL (Pantallas menores a 768px) */
+/* --- SOLO PARA MÓVILES (Menos de 768px) --- */
 @media screen and (max-width: 768px) {
     
-    /* Ocultar el texto INVENTARIO */
-    .seccion-inventario {
+    /* 1. Ocultar el texto INVENTARIO de forma absoluta */
+    .solo-pc-inventario {
         display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        margin: 0px !important;
+        padding: 0px !important;
     }
 
-    /* FORZAR CENTRADO DEL BOTÓN: 
-       Targeteamos el contenedor de la columna y el contenedor del botón */
-    [data-testid="column"] {
+    /* 2. Forzar centrado del botón Actualizar */
+    /* Rompemos el comportamiento de la columna de Streamlit */
+    div[data-testid="column"] {
         width: 100% !important;
         flex: 1 1 100% !important;
-        display: flex !important;
-        justify-content: center !important; /* Centra horizontalmente */
-        align-items: center !important;
+        min-width: 100% !important;
+        display: block !important;
+        text-align: center !important;
     }
 
-    [data-testid="stButton"] {
-        text-align: center !important;
+    /* Centramos el botón específicamente */
+    .stButton {
         display: flex !important;
         justify-content: center !important;
-        width: 100% !important;
     }
 
-    /* Ajuste visual del botón en móvil */
     .stButton > button {
-        width: 80% !important; /* Que sea un poco más ancho en móvil para el dedo */
-        margin: 0 auto !important;
+        width: 80% !important; /* Más fácil de tocar en móvil */
+        display: block !important;
+        margin: 10px auto !important;
     }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# TÍTULO Y SUBTÍTULO
+# TÍTULO
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 
-# Envolvemos "INVENTARIO" en un div con la clase que ocultamos en móvil
-st.markdown("<div class='seccion-inventario'><p style='text-align:center;'>INVENTARIO</p></div>", unsafe_allow_html=True)
+# Clase 'solo-pc-inventario' hará que desaparezca en móviles
+st.markdown("<div class='solo-pc-inventario'><p style='text-align:center;'>INVENTARIO</p></div>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
-    st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
+    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
 
 # =========================
 # BOTÓN ACTUALIZAR
 # =========================
-# En PC esto mantiene el botón a la derecha. En móvil se apila y se centra.
+# Las columnas se apilan en móvil, y el CSS de arriba centrará la segunda columna
 col1, col2 = st.columns([3, 1])
 
 with col2:
@@ -80,32 +82,30 @@ with col2:
         st.rerun()
 
 # =========================
-# CARGA DE DATOS (MANTENIENDO TU LÓGICA)
+# CARGA DE DATOS
 # =========================
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
 
 @st.cache_data(ttl=18000)
 def cargar_datos():
-    try:
-        df = pd.read_csv(URL_CSV)
-        df.columns = df.columns.str.strip()
-        df = df.fillna("-")
-        df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
-        
-        zona_ec = pytz.timezone("America/Guayaquil")
-        st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-        return df
-    except:
-        return pd.DataFrame()
+    df = pd.read_csv(URL_CSV)
+    df.columns = df.columns.str.strip()
+    df = df.fillna("-")
+    df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
+    
+    zona_ec = pytz.timezone("America/Guayaquil")
+    st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
+    return df
 
 df = cargar_datos()
 
-# --- Buscador ---
-busqueda = st.text_input("🔎 Escribe lo que estás buscando", placeholder="Ej: AA23")
+# =========================
+# BUSCADOR Y TABLA (RESPONSIVE)
+# =========================
+busqueda = st.text_input("🔎 Buscador", placeholder="Escribe aquí...")
 
 if busqueda:
     texto = busqueda.strip().lower()
-    # Si es link de Facebook, extraer ID
     match = re.search(r"item/(\d+)", texto)
     if match: texto = match.group(1)
 
@@ -115,7 +115,11 @@ if busqueda:
     filtrado = df[df["_search"].str.contains(texto, na=False)]
     
     if not filtrado.empty:
-        # Aquí puedes agregar la función hacer_links si la necesitas
-        st.dataframe(filtrado.iloc[:, columnas_fijas].head(10), use_container_width=True)
+        # Usamos use_container_width para que la tabla no se rompa en móvil
+        st.dataframe(
+            filtrado.iloc[:, columnas_fijas].head(10), 
+            use_container_width=True,
+            hide_index=True
+        )
     else:
-        st.warning("No se encontraron resultados")
+        st.warning("No encontrado")
