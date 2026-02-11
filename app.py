@@ -91,29 +91,32 @@ if "ultima_actualizacion" in st.session_state:
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
 
 # =========================
-# BOTÓN ACTUALIZAR (RESPONSIVE LIMPIO)
+# BOTÓN ACTUALIZAR (RESPONSIVE CORRECTO)
 # =========================
 
 st.markdown("""
 <style>
-.boton-container {
+
+/* PC: botón a la derecha */
+div.stButton {
     display: flex;
     justify-content: flex-end;
 }
 
+/* MÓVIL: centrar botón */
 @media (max-width: 768px) {
-    .boton-container {
+    div.stButton {
         justify-content: center;
     }
 }
+
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='boton-container'>", unsafe_allow_html=True)
 if st.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
-st.markdown("</div>", unsafe_allow_html=True)
+
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
