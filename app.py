@@ -56,11 +56,45 @@ a {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+/* ----- SOLO CELULAR ----- */
+@media (max-width: 768px) {
+
+    /* Oculta el texto INVENTARIO */
+    #titulo-inventario {
+        display: none;
+    }
+
+    /* Mueve el botón al lugar del título */
+    #boton-actualizar {
+        display: flex;
+        justify-content: center;
+        margin-top: -10px;
+        margin-bottom: 15px;
+    }
+
+    /* Botón compacto y seguro */
+    #boton-actualizar .stButton > button {
+        height: 38px;
+        padding: 0 14px;
+        font-size: 0.9rem;
+        border-radius: 20px;
+    }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 # =========================
 # TÍTULO
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p id='titulo-inventario' style='text-align:center;'>INVENTARIO</p>",
+    unsafe_allow_html=True
+)
 if "ultima_actualizacion" in st.session_state:
     st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
@@ -68,17 +102,18 @@ if "ultima_actualizacion" in st.session_state:
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
 
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv" # AUTO_EDIT
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
-col1, col2 = st.columns([3, 1])
+st.markdown('<div id="boton-actualizar">', unsafe_allow_html=True)
 
-with col2:
-    if st.button("🔄 Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
+if st.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
@@ -166,41 +201,3 @@ if busqueda:
         )
     else:
         st.warning("No se encontraron resultados")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
