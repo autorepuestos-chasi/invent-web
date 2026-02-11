@@ -54,6 +54,8 @@ a {
     text-decoration: underline;
 }
 
+
+========================= */
 /* =========================
    RESPONSIVE SOLO CELULAR
 ========================= */
@@ -64,17 +66,14 @@ a {
         display: none;
     }
 
-    /* Hacer que columnas se apilen */
-    div[data-testid="column"] {
-        width: 100% !important;
-    }
-
-    /* Centrar botón dentro de su columna */
-    div[data-testid="column"] > div {
+    /* Centrar SOLO el botón actualizar */
+    div.stButton {
         display: flex;
         justify-content: center;
     }
+
 }
+
 
 </style>
 """, unsafe_allow_html=True)
@@ -100,11 +99,10 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6
 col1, col2 = st.columns([3, 1])
 
 with col2:
-    st.markdown("<div class='boton-actualizar'>", unsafe_allow_html=True)
+   
     if st.button("🔄 Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
