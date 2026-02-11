@@ -171,3 +171,38 @@ def normalizar_busqueda(texto):
     texto = texto.strip().lower()
     match = re.search(r"item/(\d+)", texto)
     if match:
+        return match.group(1)
+    return texto
+
+# =========================
+# BUSCADOR
+# =========================
+busqueda = st.text_input(
+    "🔎 Escribe lo que estás buscando",
+    placeholder="Ej: AA23 o pega un link de Facebook"
+)
+
+# =========================
+# RESULTADOS
+# =========================
+if busqueda:
+    texto = normalizar_busqueda(busqueda)
+
+    columnas_fijas = [0, 6, 8, 7, 2, 11]
+    columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
+    columnas = df.columns[columnas_fijas]
+
+    filtrado = df[df["_search"].str.contains(texto, na=False)]
+    resultados = filtrado[columnas].head(10)
+
+    if not resultados.empty:
+        st.markdown(f"**Resultados encontrados:** {len(resultados)}")
+
+        resultados = hacer_links(resultados)
+
+        st.markdown(
+            f"<div class='table-scroll'>{resultados.to_html(index=False, escape=False)}</div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.warning("No se encontraron resultados")
