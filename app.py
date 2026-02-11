@@ -13,17 +13,15 @@ st.set_page_config(
     page_icon="🚗",
     layout="centered"
 )
-
 with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
     time.sleep(0.8)
 
 # =========================
-# ESTILOS GENERALES + RESPONSIVE
+# ESTILOS (SCROLL RESPONSIVE + MEDIA QUERY MOVIL)
 # =========================
 st.markdown("""
 <style>
-
-/* ======== CONTENEDOR GENERAL ======== */
+/* Estilos Base (PC y General) */
 .block-container {
     padding-top: 2.2rem;
     padding-left: 1rem;
@@ -31,7 +29,6 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* ======== TABLA ======== */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -59,26 +56,30 @@ a {
     text-decoration: underline;
 }
 
-/* ======== BOTÓN PC (derecha) ======== */
-div[data-testid="stHorizontalBlock"] {
-    justify-content: flex-end;
-}
-
-/* ======== SOLO CELULAR ======== */
-@media (max-width: 768px) {
-
-    /* Ocultar INVENTARIO */
+/* =========================================
+   REGLAS ESPECÍFICAS PARA MÓVILES
+   (Se activan solo si la pantalla es menor a 768px)
+   ========================================= */
+@media only screen and (max-width: 768px) {
+    
+    /* 1. Ocultar el texto INVENTARIO */
     .subtitulo-inventario {
-        display: none;
+        display: none !important;
     }
 
-    /* Centrar botón en móvil */
-    div[data-testid="stHorizontalBlock"] {
-        justify-content: center !important;
+    /* 2. Centrar el botón "Actualizar datos" */
+    /* Streamlit envuelve el botón en un div con data-testid="stButton" */
+    div[data-testid="stButton"] {
+        display: flex;
+        justify-content: center;
+        margin-top: 5px;
     }
-
+    
+    /* Opcional: Hacer el botón un poco más ancho en móvil para facilitar el toque */
+    div[data-testid="stButton"] > button {
+        width: 60%; 
+    }
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -86,25 +87,31 @@ div[data-testid="stHorizontalBlock"] {
 # TÍTULO
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
+
+# Modificado: Se agregó class='subtitulo-inventario' para poder controlarlo con CSS
 st.markdown("<p class='subtitulo-inventario' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
     st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
 # =========================
-# LINK CSV PUBLICADO
+# LINK CSV PUBLICADO (CORRECTO)
 # =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv"
+
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv" # AUTO_EDIT
 
 # =========================
-# BOTÓN ACTUALIZAR
+# BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
-if st.button("🔄 Actualizar datos"):
-    st.cache_data.clear()
-    st.rerun()
+col1, col2 = st.columns([3, 1])
+
+with col2:
+    if st.button("🔄 Actualizar datos"):
+        st.cache_data.clear()
+        st.rerun()
 
 # =========================
-# CARGA DE DATOS
+# CARGA DE DATOS (ESTABLE)
 # =========================
 @st.cache_data(ttl=18000)
 def cargar_datos():
@@ -124,7 +131,8 @@ def cargar_datos():
     zona_ec = pytz.timezone("America/Guayaquil")
 
     st.session_state["ultima_actualizacion"] = (
-        datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
+    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
+
     )
 
     return df
@@ -170,6 +178,7 @@ if busqueda:
 
     columnas_fijas = [0, 6, 8, 7, 2, 11]
 
+    # Evita error si cambian columnas
     columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
