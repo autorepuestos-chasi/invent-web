@@ -17,11 +17,11 @@ with st.spinner("⏳ Despertando la aplicación y cargando datos..."):
     time.sleep(0.8)
 
 # =========================
-# ESTILOS (SCROLL RESPONSIVE + MEDIA QUERY MOVIL)
+# ESTILOS (CORREGIDOS PARA MÓVIL)
 # =========================
 st.markdown("""
 <style>
-/* Estilos Base (PC y General) */
+/* Estilos Base */
 .block-container {
     padding-top: 2.2rem;
     padding-left: 1rem;
@@ -58,26 +58,30 @@ a {
 
 /* =========================================
    REGLAS ESPECÍFICAS PARA MÓVILES
-   (Se activan solo si la pantalla es menor a 768px)
    ========================================= */
 @media only screen and (max-width: 768px) {
     
-    /* 1. Ocultar el texto INVENTARIO */
+    /* 1. Suprimir texto INVENTARIO */
     .subtitulo-inventario {
         display: none !important;
     }
 
-    /* 2. Centrar el botón "Actualizar datos" */
-    /* Streamlit envuelve el botón en un div con data-testid="stButton" */
-    div[data-testid="stButton"] {
+    /* 2. Centrar el botón Actualizar Datos */
+    /* Apuntamos al contenedor de la columna que Streamlit genera */
+    [data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 calc(100%) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    /* Aseguramos que el botón no herede márgenes laterales */
+    [data-testid="stButton"] {
         display: flex;
         justify-content: center;
-        margin-top: 5px;
-    }
-    
-    /* Opcional: Hacer el botón un poco más ancho en móvil para facilitar el toque */
-    div[data-testid="stButton"] > button {
-        width: 60%; 
+        width: 100%;
     }
 }
 </style>
@@ -87,22 +91,21 @@ a {
 # TÍTULO
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
-
-# Modificado: Se agregó class='subtitulo-inventario' para poder controlarlo con CSS
+# Clase agregada para ocultar en móviles
 st.markdown("<p class='subtitulo-inventario' style='text-align:center;'>INVENTARIO</p>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
     st.caption(f"🟢 Datos actualizados: {st.session_state['ultima_actualizacion']}")
 
 # =========================
-# LINK CSV PUBLICADO (CORRECTO)
+# LINK CSV PUBLICADO
 # =========================
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
 
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv" # AUTO_EDIT
-
 # =========================
-# BOTÓN ACTUALIZAR (ANTI BUG)
+# BOTÓN ACTUALIZAR
 # =========================
+# En móvil, estas columnas se apilan, por lo que el CSS anterior centrará la col2
 col1, col2 = st.columns([3, 1])
 
 with col2:
@@ -111,37 +114,22 @@ with col2:
         st.rerun()
 
 # =========================
-# CARGA DE DATOS (ESTABLE)
+# CARGA DE DATOS
 # =========================
 @st.cache_data(ttl=18000)
 def cargar_datos():
     df = pd.read_csv(URL_CSV)
-
-    # Limpieza
     df.columns = df.columns.str.strip()
     df = df.fillna("-")
-
-    # Columna búsqueda
-    df["_search"] = (
-        df.astype(str)
-        .agg(" ".join, axis=1)
-        .str.lower()
-    )
-
+    df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
+    
     zona_ec = pytz.timezone("America/Guayaquil")
-
-    st.session_state["ultima_actualizacion"] = (
-    datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-
-    )
-
+    st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
     return df
 
 df = cargar_datos()
 
-# =========================
-# LINKS CLICKEABLES
-# =========================
+# (El resto del código de búsqueda y visualización se mantiene igual...)
 def hacer_links(df):
     df = df.copy()
     for col in df.columns:
@@ -152,9 +140,6 @@ def hacer_links(df):
         )
     return df
 
-# =========================
-# NORMALIZAR BÚSQUEDA (FB)
-# =========================
 def normalizar_busqueda(texto):
     texto = texto.strip().lower()
     match = re.search(r"item/(\d+)", texto)
@@ -162,23 +147,14 @@ def normalizar_busqueda(texto):
         return match.group(1)
     return texto
 
-# =========================
-# BUSCADOR
-# =========================
 busqueda = st.text_input(
     "🔎 Escribe lo que estás buscando",
     placeholder="Ej: AA23 o pega un link de Facebook"
 )
 
-# =========================
-# RESULTADOS
-# =========================
 if busqueda:
     texto = normalizar_busqueda(busqueda)
-
     columnas_fijas = [0, 6, 8, 7, 2, 11]
-
-    # Evita error si cambian columnas
     columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
     columnas = df.columns[columnas_fijas]
 
@@ -187,9 +163,7 @@ if busqueda:
 
     if not resultados.empty:
         st.markdown(f"**Resultados encontrados:** {len(resultados)}")
-
         resultados = hacer_links(resultados)
-
         st.markdown(
             f"<div class='table-scroll'>{resultados.to_html(index=False, escape=False)}</div>",
             unsafe_allow_html=True
