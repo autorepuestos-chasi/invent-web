@@ -53,8 +53,6 @@ a {
     color: #1f77b4;
     text-decoration: underline;
 }
-</style>
-""", unsafe_allow_html=True)
 
 /* =========================
    RESPONSIVE SOLO CELULAR
@@ -73,8 +71,10 @@ a {
         width: 100%;
         margin-top: 10px;
     }
-
 }
+
+</style>
+""", unsafe_allow_html=True)
 
 # =========================
 # TÍTULO
