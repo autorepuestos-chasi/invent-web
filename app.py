@@ -15,45 +15,42 @@ st.set_page_config(
 )
 
 # =========================
-# EL ÚLTIMO RECURSO: CSS ULTRA-ESPECÍFICO
+# CSS - EL "MARTILLO" DEFINITIVO
 # =========================
 st.markdown("""
 <style>
-/* Estilos generales */
+/* --- ESTILOS GENERALES --- */
 .block-container { padding-top: 2rem; }
+.table-scroll { overflow-x: auto; }
 
-/* --- SOLO PARA MÓVILES (Menos de 768px) --- */
+/* --- ESTILO PARA PC (Por defecto) --- */
+.contenedor-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* --- ESTILO PARA MÓVIL --- */
 @media screen and (max-width: 768px) {
-    
-    /* 1. Ocultar el texto INVENTARIO de forma absoluta */
-    .solo-pc-inventario {
+    /* 1. Suprimir el texto INVENTARIO */
+    #texto-inventario {
         display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        margin: 0px !important;
-        padding: 0px !important;
     }
 
-    /* 2. Forzar centrado del botón Actualizar */
-    /* Rompemos el comportamiento de la columna de Streamlit */
-    div[data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 100% !important;
-        min-width: 100% !important;
-        display: block !important;
-        text-align: center !important;
-    }
-
-    /* Centramos el botón específicamente */
+    /* 2. Forzar que el contenedor del botón ocupe todo el ancho y se centre */
     .stButton {
         display: flex !important;
         justify-content: center !important;
+        width: 100% !important;
     }
-
+    
+    /* 3. Centrar el botón específicamente */
     .stButton > button {
-        width: 80% !important; /* Más fácil de tocar en móvil */
+        width: 85% !important;
+        margin: 0 auto !important;
         display: block !important;
-        margin: 10px auto !important;
     }
 }
 </style>
@@ -64,22 +61,20 @@ st.markdown("""
 # =========================
 st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
 
-# Clase 'solo-pc-inventario' hará que desaparezca en móviles
-st.markdown("<div class='solo-pc-inventario'><p style='text-align:center;'>INVENTARIO</p></div>", unsafe_allow_html=True)
+# Usamos un ID único para el texto INVENTARIO para que el CSS lo encuentre sí o sí
+st.markdown("<div id='texto-inventario'><p style='text-align:center;'>INVENTARIO</p></div>", unsafe_allow_html=True)
 
 if "ultima_actualizacion" in st.session_state:
     st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
 
 # =========================
-# BOTÓN ACTUALIZAR
+# BOTÓN ACTUALIZAR (SIN COLUMNAS PARA EVITAR ERRORES)
 # =========================
-# Las columnas se apilan en móvil, y el CSS de arriba centrará la segunda columna
-col1, col2 = st.columns([3, 1])
-
-with col2:
-    if st.button("🔄 Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
+# En lugar de usar st.columns, dejamos que Streamlit lo ponga en su flujo natural
+# y nuestro CSS se encarga de centrarlo si detecta un móvil.
+if st.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
 
 # =========================
 # CARGA DE DATOS
@@ -92,7 +87,6 @@ def cargar_datos():
     df.columns = df.columns.str.strip()
     df = df.fillna("-")
     df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
-    
     zona_ec = pytz.timezone("America/Guayaquil")
     st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
     return df
@@ -100,7 +94,7 @@ def cargar_datos():
 df = cargar_datos()
 
 # =========================
-# BUSCADOR Y TABLA (RESPONSIVE)
+# BUSCADOR Y RESULTADOS
 # =========================
 busqueda = st.text_input("🔎 Buscador", placeholder="Escribe aquí...")
 
@@ -115,7 +109,6 @@ if busqueda:
     filtrado = df[df["_search"].str.contains(texto, na=False)]
     
     if not filtrado.empty:
-        # Usamos use_container_width para que la tabla no se rompa en móvil
         st.dataframe(
             filtrado.iloc[:, columnas_fijas].head(10), 
             use_container_width=True,
