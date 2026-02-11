@@ -1,118 +1,101 @@
 import streamlit as st
-import pandas as pd
-import re
-import time
-from datetime import datetime
-import pytz
+import streamlit.components.v1 as components
 
-# =========================
-# CONFIGURACIÓN GENERAL
-# =========================
-st.set_page_config(
-    page_title="AutoRepuestos Chasi",
-    page_icon="🚗",
-    layout="centered"
-)
+# Configuración básica para que use todo el ancho
+st.set_page_config(layout="wide", page_title="AutoRepuestos Chasi")
 
-# =========================
-# CSS - EL "MARTILLO" DEFINITIVO
-# =========================
-st.markdown("""
-<style>
-/* --- ESTILOS GENERALES --- */
-.block-container { padding-top: 2rem; }
-.table-scroll { overflow-x: auto; }
+# Aquí pegamos el código HTML que te pasé anteriormente
+# Nota: He envuelto el código en tres comillas simples '''
+html_code = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; margin:0; }
+        .container { padding: 15px; max-width: 800px; margin: auto; background: white; border-radius: 10px; }
+        h2, #subtitulo { text-align: center; }
+        .header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        
+        /* TU REQUERIMIENTO MÓVIL */
+        @media screen and (max-width: 600px) {
+            #subtitulo { display: none !important; }
+            .header-actions { justify-content: center !important; }
+            button { width: 80% !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚗 AutoRepuestos CHASI</h2>
+        <p id="subtitulo">INVENTARIO</p>
+        <div class="header-actions">
+            <span></span>
+            <button onclick="cargarDatos()">🔄 Actualizar datos</button>
+        </div>
+        <input type="text" id="searchInput" placeholder="🔎 Buscar..." oninput="filtrar()">
+        <div class="table-container">
+            <table>
+                <thead><tr id="tableHeader"></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
 
-/* --- ESTILO PARA PC (Por defecto) --- */
-.contenedor-cabecera {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 10px;
-}
+    <script>
+        const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv";
+        let datos = [];
+        const columnasIdx = [0, 6, 8, 7, 2, 11];
 
-/* --- ESTILO PARA MÓVIL --- */
-@media screen and (max-width: 768px) {
-    /* 1. Suprimir el texto INVENTARIO */
-    #texto-inventario {
-        display: none !important;
-    }
+        async function cargarDatos() {
+            try {
+                const res = await fetch(URL_CSV);
+                const text = await res.text();
+                const rows = text.split('\\n').map(r => r.split(','));
+                const headers = rows[0];
+                datos = rows.slice(1).map(r => ({
+                    vals: r,
+                    searchStr: r.join(" ").toLowerCase()
+                }));
+                
+                const thr = document.getElementById('tableHeader');
+                thr.innerHTML = "";
+                columnasIdx.forEach(i => {
+                    const th = document.createElement('th');
+                    th.innerText = headers[i] || "";
+                    thr.appendChild(th);
+                });
+            } catch (e) { console.error(e); }
+        }
 
-    /* 2. Forzar que el contenedor del botón ocupe todo el ancho y se centre */
-    .stButton {
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }
-    
-    /* 3. Centrar el botón específicamente */
-    .stButton > button {
-        width: 85% !important;
-        margin: 0 auto !important;
-        display: block !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
+        function filtrar() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = "";
+            if(q.length < 2) return;
 
-# =========================
-# TÍTULO
-# =========================
-st.markdown("<h2 style='text-align:center;'>🚗 AutoRepuestos CHASI</h2>", unsafe_allow_html=True)
+            const filtered = datos.filter(d => d.searchStr.includes(q)).slice(0, 10);
+            filtered.forEach(f => {
+                const tr = document.createElement('tr');
+                columnasIdx.forEach(i => {
+                    const td = document.createElement('td');
+                    td.innerText = f.vals[i] || "-";
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+        cargarDatos();
+    </script>
+</body>
+</html>
+"""
 
-# Usamos un ID único para el texto INVENTARIO para que el CSS lo encuentre sí o sí
-st.markdown("<div id='texto-inventario'><p style='text-align:center;'>INVENTARIO</p></div>", unsafe_allow_html=True)
-
-if "ultima_actualizacion" in st.session_state:
-    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem;'>🟢 {st.session_state['ultima_actualizacion']}</p>", unsafe_allow_html=True)
-
-# =========================
-# BOTÓN ACTUALIZAR (SIN COLUMNAS PARA EVITAR ERRORES)
-# =========================
-# En lugar de usar st.columns, dejamos que Streamlit lo ponga en su flujo natural
-# y nuestro CSS se encarga de centrarlo si detecta un móvil.
-if st.button("🔄 Actualizar datos"):
-    st.cache_data.clear()
-    st.rerun()
-
-# =========================
-# CARGA DE DATOS
-# =========================
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=1427446213&single=true&output=csv"
-
-@st.cache_data(ttl=18000)
-def cargar_datos():
-    df = pd.read_csv(URL_CSV)
-    df.columns = df.columns.str.strip()
-    df = df.fillna("-")
-    df["_search"] = df.astype(str).agg(" ".join, axis=1).str.lower()
-    zona_ec = pytz.timezone("America/Guayaquil")
-    st.session_state["ultima_actualizacion"] = datetime.now(zona_ec).strftime("%d/%m/%Y %H:%M:%S")
-    return df
-
-df = cargar_datos()
-
-# =========================
-# BUSCADOR Y RESULTADOS
-# =========================
-busqueda = st.text_input("🔎 Buscador", placeholder="Escribe aquí...")
-
-if busqueda:
-    texto = busqueda.strip().lower()
-    match = re.search(r"item/(\d+)", texto)
-    if match: texto = match.group(1)
-
-    columnas_fijas = [0, 6, 8, 7, 2, 11]
-    columnas_fijas = [i for i in columnas_fijas if i < len(df.columns)]
-    
-    filtrado = df[df["_search"].str.contains(texto, na=False)]
-    
-    if not filtrado.empty:
-        st.dataframe(
-            filtrado.iloc[:, columnas_fijas].head(10), 
-            use_container_width=True,
-            hide_index=True
-        )
-    else:
-        st.warning("No encontrado")
+# Esta línea es la que hace la magia: incrusta el HTML en el app de Python
+components.html(html_code, height=800, scrolling=True)
