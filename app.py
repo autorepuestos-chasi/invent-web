@@ -91,15 +91,30 @@ if "ultima_actualizacion" in st.session_state:
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
 
 # =========================
-# BOTÓN ACTUALIZAR (ANTI BUG)
+# BOTÓN ACTUALIZAR (RESPONSIVE LIMPIO)
 # =========================
-col1, col2 = st.columns([3, 1])
 
-with col2:
-   
-    if st.button("🔄 Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
+st.markdown("""
+<style>
+.boton-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .boton-container {
+        justify-content: center;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<div class='boton-container'>", unsafe_allow_html=True)
+if st.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
