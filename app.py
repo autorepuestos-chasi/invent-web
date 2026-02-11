@@ -91,44 +91,29 @@ if "ultima_actualizacion" in st.session_state:
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6vYdOmR1scVPOvmW66mgpDMXjMO_EyZcLI9Ezuy8vNkpA/pub?gid=586010588&single=true&output=csv" # AUTO_EDIT
 
 # =========================
-# BOTÓN ACTUALIZAR (RESPONSIVE REAL)
+# BOTÓN ACTUALIZAR (RESPONSIVE LIMPIO)
 # =========================
+
 st.markdown("""
 <style>
+.boton-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
 @media (max-width: 768px) {
-    .boton-movil {
-        display: flex;
+    .boton-container {
         justify-content: center;
-        margin-top: 10px;
     }
 }
 </style>
 """, unsafe_allow_html=True)
 
-import streamlit as st
-
-is_mobile = st.session_state.get("is_mobile", False)
-
-# Truco simple: usar ancho de pantalla con JS
-st.markdown("""
-<script>
-const width = window.innerWidth;
-if (width <= 768) {
-    window.parent.postMessage({type: "streamlit:setComponentValue", value: true}, "*");
-}
-</script>
-""", unsafe_allow_html=True)
-
-# Layout normal (PC)
-col1, col2 = st.columns([3, 1])
-
-with col2:
-    st.markdown("<div class='boton-movil'>", unsafe_allow_html=True)
-    if st.button("🔄 Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
+st.markdown("<div class='boton-container'>", unsafe_allow_html=True)
+if st.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
