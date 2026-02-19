@@ -76,7 +76,7 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6
 col1, col2 = st.columns([3, 1])
 
 with col2:
-    if st.button("🔄 Actualizar datos"):
+    if st.button("🔄"):
         st.cache_data.clear()
         st.rerun()
 
