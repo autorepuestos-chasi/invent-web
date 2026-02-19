@@ -73,7 +73,7 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
-col1, col2 = st.columns([10, 100])
+col1, col2 = st.columns([1000, 100])
 
 with col2:
     if st.button("🔄"):
