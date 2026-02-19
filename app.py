@@ -73,12 +73,12 @@ URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjvIAfApdQmXKQavdfz6
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
 # =========================
-col1, col2 = st.columns([1, 1])
+#col1, col2 = st.columns([1, 1])
 
-with col2:
-    if st.button("🔄"):
-        st.cache_data.clear()
-        st.rerun()
+#with col2:
+#    if st.button("🔄"):
+#        st.cache_data.clear()
+#        st.rerun()
 
 # =========================
 # CARGA DE DATOS (ESTABLE)
