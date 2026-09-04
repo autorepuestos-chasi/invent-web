@@ -68,7 +68,7 @@ if "ultima_actualizacion" in st.session_state:
 # LINK CSV PUBLICADO (CORRECTO)
 # =========================
 
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYivCOEltQSLOTZdlHELXiIyOZpFP37p4qHE4VHyJqFDPtr2_wKOli4ThrT5zviA/pub?gid=1278699910&single=true&output=csv" # AUTO_EDIT
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYivCOEltQSLOTZdlHELXiIyOZpFP37p4qHE4VHyJqFDPtr2_wKOli4ThrT5zviA/pub?gid=1065190951&single=true&output=csv" # AUTO_EDIT
 
 # =========================
 # BOTÓN ACTUALIZAR (ANTI BUG)
@@ -166,6 +166,7 @@ if busqueda:
         )
     else:
         st.warning("No se encontraron resultados")
+
 
 
 
